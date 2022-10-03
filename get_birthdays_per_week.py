@@ -17,7 +17,7 @@ def get_birthdays_per_week(users):
         for user in users:
             if today == user.get("birthday"):
                 names.append(user.get("name"))
-        if today.strftime('%A') == "Sunday" or today.strftime('%A') == "Saturday":
+        if today.strftime('%A') in ("Sunday", "Saturday"):
             weekends_names.extend(names)
             today = today + datetime.timedelta(days=1)
             continue
