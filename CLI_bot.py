@@ -6,11 +6,9 @@ def input_error(handler):
         try:
             handler(*args)
         except TypeError as e:
-            arg = input('Enter user name:')
-            return wrapper(arg)
+            print('Enter user name')
         except Exception as e:
-            args = input('Give me name and phone please:').split()
-            return wrapper(*args)
+            print('Give me name and phone please')
     return wrapper
 
 
