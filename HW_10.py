@@ -16,59 +16,40 @@ class Phone(Field):
 
 class AddressBook(UserDict):
 
-    def find_contact(self):
-        name = input('enter name: ')
-        if name in self.data:
-            record = self.data[name]
-            print(record, str(record.name.value), str(record.phones))
-        else:
-            print('Contact is not found')
-
-    def add_record(self):
-        name = Name(input('enter name: '))
-        phone = Phone(input('enter phone: '))
-        record = Record(name=name)
-        if phone.value:
-            record.add(phone)
-        print(record)
+    def add_record(self, record):
         self.data[record.name.value] = record
-        print('New contact added.')
-
-    def show_all(self):
-        for name, phone in self.data.items():
-            print(name, phone)
-
-    def change(self):
-        name = Name(input('enter name: '))
-        phone = Phone(input('enter phone to change: '))
-        self.data[name] = phone
-        print(f'Contact{name} successfully changed.')
 
 
-class Record:
+class Record(Field):
     def __init__(self, name):
-        self.name = name
+        self.name = Name(name)
         self.phones = []
 
     def add(self, phone):
-        self.phones.append(phone)
+        self.phones.append(Phone(phone))
 
     def remove(self, phone):
-        self.phones.remove(phone)
+        self.phones.remove(Phone(phone))
 
     def update(self, old_phone, new_phone):
-        self.remove(old_phone)
-        self.add(new_phone)
+        for phone in self.phones:
+            if phone.value == old_phone:
+                self.add(new_phone)
+                self.phones.remove(phone)
 
 
 def input_error(handler):
     def wrapper(*args):
         try:
             handler(*args)
-        except TypeError as e:
-            print('Enter user name')
-        except Exception as e:
-            print('Give me name and phone please')
+        except TypeError:
+            print('Give me name and phone please.')
+        except ValueError:
+            print('Enter correct type.')
+        except IndexError:
+            print('Give me name and phone please.')
+        except KeyError:
+            print('Enter user name.')
     return wrapper
 
 
@@ -77,32 +58,68 @@ def hello():
     print('How can I help you?')
 
 
+@input_error
+def show():
+    print(addressbook.data)
+
+
+@input_error
+def add_contact(*args):
+    name = args[0]
+    phone = args[1]
+    record = Record(name)
+    record.add(phone)
+    addressbook.add_record(record)
+    print(f'New contact added.\nName: {name},\nPhone: {phone}')
+
+
+@input_error
+def find_contact(arg):
+    name = arg
+    print(list(map(lambda x: x.value, addressbook.data[name].phones)))
+
+
+@input_error
+def change(*args):
+    name = args[0]
+    phone = args[1]
+    new_phone = args[2]
+    record = addressbook.data[name]
+    record.update(old_phone=phone, new_phone=new_phone)
+    print(f'Contact {name} successfully changed old phone: {phone} to new: {new_phone}')
+
+
+def quit_func():
+    print('Good bye!')
+    quit()
+
+
+COMMANDS = {
+    'hello': hello,
+    'exit': quit_func,
+    'close': quit_func,
+    'good bye': quit_func,
+    'add': add_contact,
+    'phone': find_contact,
+    'show all': show,
+    'change': change
+}
+
+
 def main():
-    book = AddressBook()
-
-    commands = {
-        'hello': hello,
-        'exit': quit,
-        'close': quit,
-        'good bye': quit,
-        'add': book.add_record,
-        'phone': book.find_contact,
-        'show all': book.show_all,
-        'change': book.change
-    }
-
     while True:
         com, *args = input("Enter command:").split()
         if com.lower() == 'show' and args[0].lower() == 'all' or com.lower() == 'good' and args[0].lower() == 'bye':
             com = com.lower() + " " + args[0].lower()
-            commands[com]()
+            COMMANDS[com]()
             continue
         com = com.lower()
-        if com not in commands:
+        if com not in COMMANDS:
             print('Wrong command')
             continue
-        commands[com](*args)
+        COMMANDS[com](*args)
 
 
 if __name__ == "__main__":
-    exit(main())
+    addressbook = AddressBook()
+    main()
