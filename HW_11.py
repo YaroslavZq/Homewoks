@@ -51,24 +51,21 @@ class Birthday(Field):
 
 class Record:
 
-    def __init__(self, name: Name, phones: Phone, birthday: Birthday = None):
+    def __init__(self, name: Name, birthday: Birthday = None):
         self.name = name
-        self.phones = phones
+        self.phones = []
         self.birthday = birthday
 
-    def add_phone(self, name, phone):
-        if name.value == self.name.value:
-            self.phones.value.append(phone.value[0])
+    def add_phone(self, phone):
+        self.phones.append(phone)
 
-    def replace_phone(self, name: Name, phone: Phone):
-        if name.value == self.name.value:
-            self.phones.value = phone.value
+    def replace_phone(self, phone: Phone):
+        self.phones.value = phone.value
 
     def remove_phone(self, name, count):
-        if name.value == self.name.value:
-            self.phones.value.pop(count)
-            print(f'Phone number for contact {name.value.capitalize()} '
-                  f'is deleted')
+        self.phones.pop(count)
+        print(f'Phone number for contact {name.value.capitalize()} '
+              f'is deleted')
 
     def add_birthday(self, birth: datetime):
         if self.birthday is None:
@@ -94,9 +91,9 @@ class Record:
 
     def __repr__(self):
         if not self.birthday:
-            return str(f'{self.name.value.capitalize()}, {self.phones.value}')
+            return str(f'{self.name.value.capitalize()}, {self.phones}')
         else:
-            return str(f'{self.name.value.capitalize()}, {self.phones.value}, '
+            return str(f'{self.name.value.capitalize()}, {self.phones}, '
                        f'Birthday: {self.birthday.value}')
 
 
@@ -132,7 +129,8 @@ def hello_message():
 def add_person(user_message):
     name = Name(user_message.split(' ')[1])
     phone = Phone(user_message.split(' ')[2])
-    record = Record(name, phone)
+    record = Record(name)
+    record.add_phone(Phone(phone))
     if len(user_message.split(' ')) != 3:
         print('Enter correct name and phone')
         return False
@@ -149,12 +147,12 @@ def add_person(user_message):
 def change_phone(user_message):
     name = Name(user_message.split(' ')[1])
     phone = Phone(user_message.split(' ')[2])
-    record = Record(name, phone)
+    record = Record(name)
     if len(user_message.split(' ')) != 3:
         print('use command like this "change /name/ /phone/"')
         return False
     if name.value in addressbook and Phone.validate_phone(phone.value):
-        record.replace_phone(name, phone)
+        record.replace_phone(phone)
         print(f'{name.value.capitalize()} phone has been '
               f'changed to {phone.value}')
     if name.value not in addressbook:
@@ -166,7 +164,7 @@ def change_phone(user_message):
 def append_phone(user_message):
     name = Name(user_message.split(' ')[1])
     phone = Phone(user_message.split(' ')[2])
-    record = Record(name, phone)
+    record = Record(name)
     if len(user_message.split(' ')) != 3:
         print('Enter correct name and phone')
         return False
@@ -176,7 +174,7 @@ def append_phone(user_message):
             f'You cannot added number for it')
         return False
     if Phone.validate_phone(phone.value):
-        record.add_phone(name, phone)
+        record.add_phone(phone)
         print(f'For {name.value.capitalize()} added phone {phone.value}')
 
 
