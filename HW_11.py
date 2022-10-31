@@ -59,8 +59,11 @@ class Record:
     def add_phone(self, phone):
         self.phones.append(phone)
 
-    def replace_phone(self, phone: Phone):
-        self.phones.value = phone.value
+    def replace_phone(self, old_phone: Phone, new_phone: Phone):
+        for phone in self.phones:
+            if phone.value == old_phone:
+                self.add_phone(new_phone)
+                self.phones.remove(phone)
 
     def remove_phone(self, name, count):
         self.phones.pop(count)
@@ -147,12 +150,13 @@ def add_person(user_message):
 def change_phone(user_message):
     name = Name(user_message.split(' ')[1])
     phone = Phone(user_message.split(' ')[2])
+    new_phone = Phone(user_message.split(' ')[3])
     record = Record(name)
-    if len(user_message.split(' ')) != 3:
-        print('use command like this "change /name/ /phone/"')
+    if len(user_message.split(' ')) != 4:
+        print('use command like this "change /contact name/ /old contact phone/ /new contact phone/"')
         return False
     if name.value in addressbook and Phone.validate_phone(phone.value):
-        record.replace_phone(phone)
+        record.replace_phone(phone, new_phone)
         print(f'{name.value.capitalize()} phone has been '
               f'changed to {phone.value}')
     if name.value not in addressbook:
@@ -278,7 +282,7 @@ def when_birthday(user_message):
 
 commands = '''
 Add a new contact: "add" /contact name/ /contact phone/
-Change phone for a contact: "change" /contact name/ /new contact phone/
+Change phone for a contact: "change" /contact name/ /old contact phone/ /new contact phone/
 Add new phone for contact: "append" /contact name/ /new contact phone/
 Delete the phone for contact: "delete" /contact name/
 See the contact's phone number: "phone" /contact name/
