@@ -61,7 +61,7 @@ class Record:
 
     def replace_phone(self, old_phone: Phone, new_phone: Phone):
         for phone in self.phones:
-            if phone.value == old_phone:
+            if phone.value == old_phone.value:
                 self.add_phone(new_phone)
                 self.phones.remove(phone)
 
