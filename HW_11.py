@@ -1,5 +1,6 @@
 from collections import UserDict
 from datetime import datetime
+import pickle
 
 
 class Field:
@@ -61,9 +62,9 @@ class Record:
 
     def replace_phone(self, old_phone: Phone, new_phone: Phone):
         for phone in self.phones:
-            if phone.value == old_phone.value:
+            if phone.value == old_phone:
                 self.add_phone(new_phone)
-                self.phones.remove(phone)
+                self.phones.remove(phone.value)
 
     def remove_phone(self, name, count):
         self.phones.pop(count)
@@ -107,6 +108,18 @@ class AddressBook(UserDict):
     def iterator(self):
         for record in self.data.values():
             yield record
+
+    def write_contacts_to_file(self):
+        with open('data_notebook.txt', 'wb') as file:
+            pickle.dump(self.data, file)
+
+    def read_contacts_from_file(self):
+        try:
+            with open('data_notebook.txt', 'rb') as file:
+                contacts_archive = pickle.load(file)
+                return contacts_archive
+        except FileNotFoundError:
+            pass
 
 
 def input_error(handler):
@@ -158,7 +171,7 @@ def change_phone(user_message):
     if name.value in addressbook and Phone.validate_phone(phone.value):
         record.replace_phone(phone, new_phone)
         print(f'{name.value.capitalize()} phone has been '
-              f'changed to {phone.value}')
+              f'changed to {new_phone.value}')
     if name.value not in addressbook:
         print(f'{name.value.capitalize()} is not in the phone book. '
               f'You cannot change its number')
@@ -237,6 +250,18 @@ def show_part(user_message):
             break
 
 
+def searcher(user_message):
+
+    part_for_search = user_message.split(' ')[1]
+
+    for users in addressbook.values():
+        for el in users.phones.value:
+            if part_for_search in el:
+                print(users)
+        if part_for_search in users.name.value:
+            print(users)
+
+
 @input_error
 def select_birthday_date(user_message):
     name = Name(user_message.split(' ')[1])
@@ -290,6 +315,7 @@ Set a birthday for a contact: "birthday" /contact name/
 Get information about the contact's birthday: "party" /contact name/
 View all contacts: "show all"
 View N elements of the notebook: "part" /N/
+Search by records: "search" /search phrase/
 See this message again: "help"
 '''
 
@@ -310,6 +336,7 @@ COMMANDS = {
     'birthday': select_birthday_date,
     'help': get_help,
     'party': when_birthday,
+    'search': searcher
 }
 
 
@@ -333,3 +360,4 @@ def main():
 if __name__ == '__main__':
     addressbook = AddressBook()
     main()
+
